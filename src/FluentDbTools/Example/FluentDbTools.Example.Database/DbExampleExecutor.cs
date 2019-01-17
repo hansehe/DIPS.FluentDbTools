@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -31,8 +32,13 @@ namespace FluentDbTools.Example.Database
                 }
                 
                 (await repository.SelectPerson(persons.First().Id)).Should().BeEquivalentTo(persons.First());
-                (await repository.SelectPersons(persons.Select(x => x.Id).ToArray())).Last().Should().BeEquivalentTo(persons.Last());
 
+                var subsetPersons = persons.Take(persons.Length / 2).ToArray();
+                var selectedPersons = (await repository.SelectPersons(subsetPersons.Select(x => x.Id).ToArray())).Select(x => x.Id).ToArray();
+                selectedPersons.Length.Should().Be(subsetPersons.Length);
+                selectedPersons.Should().Contain(subsetPersons.Select(x => x.Id));
+
+                persons.First().Alive = false;
                 persons.First().Username = "New Name";
                 await repository.UpdatePerson(persons.First());
                 (await repository.SelectPerson(persons.First().Id)).Should().BeEquivalentTo(persons.First());
