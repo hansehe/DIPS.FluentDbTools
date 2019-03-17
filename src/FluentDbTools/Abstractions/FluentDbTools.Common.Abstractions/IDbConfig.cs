@@ -21,9 +21,13 @@ namespace FluentDbTools.Common.Abstractions
         bool Pooling { get; }
         
         string Schema { get; }
-        
+
+        string SchemaPassword { get; }
+
         string DefaultTablespace { get; }
         
         string TempTablespace { get; }
+        
+        string ConnectionStringTemplate { get; }
     }
 }

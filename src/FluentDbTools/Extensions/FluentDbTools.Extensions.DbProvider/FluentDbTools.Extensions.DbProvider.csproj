@@ -4,10 +4,10 @@
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
+    <Import Project="..\..\SolutionInfo.proj" />
+
     <ItemGroup>
-      <ProjectReference Include="..\..\Abstractions\FluentDbTools.Database.Abstractions\FluentDbTools.Database.Abstractions.csproj" />
-      <ProjectReference Include="..\..\Implementations\FluentDbTools.DbProvider.Oracle\FluentDbTools.DbProvider.Oracle.csproj" />
-      <ProjectReference Include="..\..\Implementations\FluentDbTools.DbProvider.Postgres\FluentDbTools.DbProvider.Postgres.csproj" />
+      <ProjectReference Include="..\..\Implementations\FluentDbTools.DbProviders\FluentDbTools.DbProviders.csproj" />
     </ItemGroup>
 
 </Project>

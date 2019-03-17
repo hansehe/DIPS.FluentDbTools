@@ -1,68 +1,94 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Data;
+using System.Data.Common;
 using FluentDbTools.Common.Abstractions;
-using FluentDbTools.Database.Abstractions;
-using FluentDbTools.DbProvider.Oracle;
-using FluentDbTools.DbProvider.Postgres;
 
 namespace FluentDbTools.Extensions.DbProvider
 {
     public static class DbProviderExtensions
     {
         private const string ErrorMsg = "Database type {0} is not implemented. " +
-                                        "Please register a database provider implementing the 'IDbConnectionProvider' interface, " +
+                                        "Please register a database provider implementing the '{1}' interface, " +
                                         "and register with 'Register'.";
        
-        public static readonly Dictionary<SupportedDatabaseTypes, IDbConnectionProvider> DbConnectionProvidersField =
-            new Dictionary<SupportedDatabaseTypes, IDbConnectionProvider>
+        public static readonly ConcurrentDictionary<SupportedDatabaseTypes, IDbConnectionProvider> DbConnectionProviders =
+            new ConcurrentDictionary<SupportedDatabaseTypes, IDbConnectionProvider>
             {
-                {SupportedDatabaseTypes.Oracle, new OracleProvider()},
-                {SupportedDatabaseTypes.Postgres, new PostgresProvider()}
+                [SupportedDatabaseTypes.Oracle] = new DbProviders.OracleProvider(),
+                [SupportedDatabaseTypes.Postgres] = new DbProviders.PostgresProvider()
             };
 
-        public static IReadOnlyDictionary<SupportedDatabaseTypes, IDbConnectionProvider>
-            DbConnectionProviders => DbConnectionProvidersField;
+        public static readonly ConcurrentDictionary<SupportedDatabaseTypes, DbProviderFactory> DbProviderFactories =
+            new ConcurrentDictionary<SupportedDatabaseTypes, DbProviderFactory>();
 
         public static string GetConnectionString(this IDbConfig dbConfig)
         {
             var dbType = dbConfig.DbType;
-            AssertDbTypeImplemented(dbType);
+            AssertDbConnectionImplemented(dbType);
             return DbConnectionProviders[dbType].GetConnectionString(dbConfig);
         }
         
         public static string GetAdminConnectionString(this IDbConfig dbConfig)
         {
             var dbType = dbConfig.DbType;
-            AssertDbTypeImplemented(dbType);
+            AssertDbConnectionImplemented(dbType);
             return DbConnectionProviders[dbType].GetAdminConnectionString(dbConfig);
+        }
+        
+        public static DbProviderFactory GetDbProviderFactory(this IDbConfig dbConfig, bool withAdminPrivileges = false)
+        {
+            var dbType = dbConfig.DbType;
+            AssertDbProviderFactoryImplemented(dbType);
+            var connectionString =
+                withAdminPrivileges ? dbConfig.GetAdminConnectionString() : dbConfig.GetConnectionString();
+            var dbProviderFactory = new FluentDbProviderFactory(DbProviderFactories[dbType], connectionString);
+            return dbProviderFactory;
         }
 
         public static IDbConnection CreateDbConnection(this IDbConfig dbConfig, bool withAdminPrivileges = false)
         {
             var dbType = dbConfig.DbType;
-            AssertDbTypeImplemented(dbType);
-            return DbConnectionProviders[dbType].CreateDbConnection(dbConfig); 
+            AssertDbConnectionImplemented(dbType);
+            AssertDbProviderFactoryImplemented(dbType);
+            return dbConfig.GetDbProviderFactory(withAdminPrivileges).CreateConnection();
         }
 
-        public static IDbConnectionProvider Register(this IDbConnectionProvider dbConnectionProvider, bool replaceOldInstance = true)
+        public static IDbConnectionProvider Register(this IDbConnectionProvider dbConnectionProvider, bool skipIfAlreadyRegistered = false)
         {
-            if (replaceOldInstance)
+            if (skipIfAlreadyRegistered && DbConnectionProviders.ContainsKey(dbConnectionProvider.DatabaseType))
             {
-                DbConnectionProvidersField[dbConnectionProvider.DatabaseType] = dbConnectionProvider;
+                return DbConnectionProviders[dbConnectionProvider.DatabaseType];
             }
-            else
-            {
-                DbConnectionProvidersField.Add(dbConnectionProvider.DatabaseType, dbConnectionProvider);
-            }
+            
+            DbConnectionProviders[dbConnectionProvider.DatabaseType] = dbConnectionProvider;
             return dbConnectionProvider;
         }
+        
+        public static DbProviderFactory Register(this DbProviderFactory dbProviderFactory, SupportedDatabaseTypes databaseType, bool skipIfAlreadyRegistered = false)
+        {
+            if (skipIfAlreadyRegistered && DbProviderFactories.ContainsKey(databaseType))
+            {
+                return DbProviderFactories[databaseType];
+            }
+            
+            DbProviderFactories[databaseType] = dbProviderFactory;
+            return dbProviderFactory;
+        }
 
-        private static void AssertDbTypeImplemented(SupportedDatabaseTypes dbType)
+        private static void AssertDbConnectionImplemented(SupportedDatabaseTypes dbType)
         {
             if (!DbConnectionProviders.ContainsKey(dbType))
             {
-                throw new NotImplementedException(string.Format(ErrorMsg, dbType.ToString()));
+                throw new NotImplementedException(string.Format(ErrorMsg, dbType.ToString(), nameof(IDbConnectionProvider)));
+            }
+        }
+        
+        private static void AssertDbProviderFactoryImplemented(SupportedDatabaseTypes dbType)
+        {
+            if (!DbProviderFactories.ContainsKey(dbType))
+            {
+                throw new NotImplementedException(string.Format(ErrorMsg, dbType.ToString(), nameof(DbProviderFactory)));
             }
         }
     }

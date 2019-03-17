@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  fluentdbtools-nuget:
+    image: fluentdbtools.nuget
+    container_name: fluentdbtools.nuget
+    build:
+      context: .
+      dockerfile: Dockerfile_BuildNuget
+      args:
+        - VERSION=${VERSION}
+        - SOLUTION_FOLDER=FluentDbTools

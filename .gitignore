@@ -39,8 +39,23 @@ x64/
 # NuGet Packages Directory
 packages
 *.nupkg
+output/
 
 *.pyc
 __pycache__/
 .vscode/
 .idea/
+
+# certificates
+*.crt
+*.p7b
+*.pfx
+*.p12
+pw.txt
+apikey.txt
+PKCS7/
+X509/
+CodeSign/
+
+docker-compose.build.*.yml
+docker-compose.publish.*.yml

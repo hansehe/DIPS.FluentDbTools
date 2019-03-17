@@ -1,4 +1,8 @@
 ﻿# FluentDbTools
+
+[![Build Status](https://travis-ci.com/DIPSAS/FluentDbTools.svg?branch=master)](https://travis-ci.com/DIPSAS/FluentDbTools)
+[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+
 FluentDbTools provides a fluent SQL abstraction layer for creating database connections, building sql queries and migrating your database.
 
 Following databases are currently supported:
@@ -6,10 +10,12 @@ Following databases are currently supported:
 - Postgres
 
 ## Nugets
-- DbProvider: `FluentDbTools.Extensions.DbProvider`
-- SqlBuilder: `FluentDbTools.Extensions.SqlBuilder`
-- Migration: `FluentDbTools.Extensions.Migration`
-- Extension.MSDependencyInjection: `FluentDbTools.Extensions.MSDependencyInjection`
+- FluentDbTools.Extensions.DbProvider: [![NuGet version](https://badge.fury.io/nu/FluentDbTools.Extensions.DbProvider.svg)](https://badge.fury.io/nu/FluentDbTools.Extensions.DbProvider)
+- FluentDbTools.Extensions.SqlBuilder: [![NuGet version](https://badge.fury.io/nu/FluentDbTools.Extensions.SqlBuilder.svg)](https://badge.fury.io/nu/FluentDbTools.Extensions.SqlBuilder)
+- FluentDbTools.Extensions.Migration: [![NuGet version](https://badge.fury.io/nu/FluentDbTools.Extensions.Migration.svg)](https://badge.fury.io/nu/FluentDbTools.Extensions.Migration)
+- FluentDbTools.Extension.MSDependencyInjection: [![NuGet version](https://badge.fury.io/nu/FluentDbTools.Extensions.MSDependencyInjection.svg)](https://badge.fury.io/nu/FluentDbTools.Extensions.MSDependencyInjection)
+- FluentDbTools.Extension.MSDependencyInjection.Oracle: [![NuGet version](https://badge.fury.io/nu/FluentDbTools.Extensions.MSDependencyInjection.Oracle.svg)](https://badge.fury.io/nu/FluentDbTools.Extensions.MSDependencyInjection.Oracle)
+- FluentDbTools.Extension.MSDependencyInjection.Postgres: [![NuGet version](https://badge.fury.io/nu/FluentDbTools.Extensions.MSDependencyInjection.Postgres.svg)](https://badge.fury.io/nu/FluentDbTools.Extensions.MSDependencyInjection.Postgres)
 
 ## Example
 The `IDbConfig` interface is the only member you need to instantiate.
@@ -73,18 +79,16 @@ Please have a look in the example folder:
 
 ## Build & Run
 1. Start domain development by deploying service dependencies:
-    - `dbm -start`
+    - `dbm -swarm -start`
 2. Test solution in containers:
     - `dbm -test`
 3. Open solution and continue development:
     - [FluentDbTools](src/FluentDbTools)
 4. Publish new nuget version:
     - Bump version in [CHANGELOG.md](CHANGELOG.md)
-    - `dbm -publish`
+    - Build and publish nugets: `dbm -build -run -publish`
 7. Stop development when you feel like it:
-    - `dbm -stop`
-
-## Additional Info
+    - `dbm -swarm -stop`
 
 ### Buildsystem
 - [DockerBuildManagement](https://github.com/DIPSAS/DockerBuildManagement)

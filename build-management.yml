@@ -2,6 +2,24 @@ changelog:
     file: CHANGELOG.md
     envKey: VERSION
 
+build:
+    selections:
+        fluentDbTools:
+            directory: src
+            files:
+                - docker-compose.nuget.build.yml
+
+run:
+    selections:
+        fluentDbTools:
+            directory: src
+            copyFromContainer:
+                fluentdbtools.nuget:
+                    containerSrc: src/nuget/
+                    hostDest: output
+            files:
+                - docker-compose.nuget.build.yml
+
 test:
     selections:
         fluentDbTools:
@@ -16,10 +34,11 @@ publish:
     selections:
         fluentDbTools:
             directory: src
-            additionalTag: latest
+            cmd:
+                - python .\sign_nugets.py -p ${CERTIFICATE_PASSWORD} -c ${CERTIFICATE_PATH}
             containerArtifact: false
             files:
-                - docker-compose.publish.nuget.yml
+                - docker-compose.nuget.publish.yml
 
 swarm:
     selections:
